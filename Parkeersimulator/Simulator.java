@@ -42,7 +42,14 @@ public class Simulator {
             tick();
         }
     }
-
+    
+    public void simulateByMinute(int minute) 
+    {
+    	for (int i = 0; i <= minute; i++) {
+            tick();
+        }
+    }
+    
     private void tick() {
     	advanceTime();
     	handleExit();
