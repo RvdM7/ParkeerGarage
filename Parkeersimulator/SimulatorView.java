@@ -229,7 +229,7 @@ public class SimulatorView extends JFrame {
     		ButtonPlusHunderd.setToolTipText("Simuleer 100 minuten");
 
     		ButtonPlusOne.addActionListener(this);
-    		ButtonPlusOne.addActionListener(this);
+    		ButtonPlusHunderd.addActionListener(this);
     		
     		ButtonPlusOne.setActionCommand("plus1");
     		ButtonPlusHunderd.setActionCommand("Plus100");
@@ -244,7 +244,11 @@ public class SimulatorView extends JFrame {
     	{
     		 if ("plus1".equals(e.getActionCommand()))
     		 {
-    			 //Simulator.simulateByMinute(1);
+    			 Simulator.simulateByMinute(1);
+    		 }
+    		 else if ("Plus100".equals(e.getActionCommand()))
+    		 {
+    			 Simulator.simulateByMinute(100);
     		 }
     	}
     	
