@@ -37,7 +37,7 @@ public class Simulator {
         simulatorView = new SimulatorView(3, 6, 30);
     }
 
-    public void run() {
+    public static void run() {
         for (int i = 0; i < 10000; i++) {
             tick();
         }
