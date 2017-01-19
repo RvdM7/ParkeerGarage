@@ -2,9 +2,12 @@ package Parkeersimulator;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class SimulatorView extends JFrame {
     private CarParkView carParkView;
+    private AdvanceButton advanceButton;
     private int numberOfFloors;
     private int numberOfRows;
     private int numberOfPlaces;
@@ -19,9 +22,13 @@ public class SimulatorView extends JFrame {
         cars = new Car[numberOfFloors][numberOfRows][numberOfPlaces];
         
         carParkView = new CarParkView();
-
+        advanceButton = new AdvanceButton();
+        
+        
         Container contentPane = getContentPane();
         contentPane.add(carParkView, BorderLayout.CENTER);
+        contentPane.add(advanceButton, BorderLayout.NORTH);
+        
         pack();
         setVisible(true);
 
@@ -205,6 +212,46 @@ public class SimulatorView extends JFrame {
                     20 - 1,
                     10 - 1); // TODO use dynamic size or constants
         }
+    }
+    	
+    private class AdvanceButton extends JPanel 
+    							implements ActionListener
+    {
+    	
+    	public JButton ButtonPlusOne, ButtonPlusHunderd;
+    	
+    	public AdvanceButton() 
+    	{
+    		ButtonPlusOne = new JButton("+1");
+    		ButtonPlusOne.setToolTipText("Simuleer 1 minuut");
+    		
+    		ButtonPlusHunderd = new JButton("+100");
+    		ButtonPlusHunderd.setToolTipText("Simuleer 100 minuten");
+
+    		ButtonPlusOne.addActionListener(this);
+    		ButtonPlusHunderd.addActionListener(this);
+    		
+    		ButtonPlusOne.setActionCommand("plus1");
+    		ButtonPlusHunderd.setActionCommand("Plus100");
+    		
+    		add(ButtonPlusOne);
+    		add(ButtonPlusHunderd);
+    		
+    		
+    	}
+    	
+    	public void actionPerformed(ActionEvent e)
+    	{
+    		 if ("plus1".equals(e.getActionCommand()))
+    		 {
+    			 Simulator.simulateByMinute(1);
+    		 }
+    		 else if ("Plus100".equals(e.getActionCommand()))
+    		 {
+    			 Simulator.simulateByMinute(100);
+    		 }
+    	}
+    	
     }
 
 }
