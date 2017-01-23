@@ -13,22 +13,29 @@ public class SimulatorView extends JFrame {
     private int numberOfPlaces;
     private int numberOfOpenSpots;
     private Car[][][] cars;
+    private int passPlaces;
+    private Location lastPass;
+    private int amount;
 
-    public SimulatorView(int numberOfFloors, int numberOfRows, int numberOfPlaces) {
+    public SimulatorView(int numberOfFloors, int numberOfRows, int numberOfPlaces, int passPlaces) {
         this.numberOfFloors = numberOfFloors;
         this.numberOfRows = numberOfRows;
         this.numberOfPlaces = numberOfPlaces;
         this.numberOfOpenSpots =numberOfFloors*numberOfRows*numberOfPlaces;
+        this.passPlaces = passPlaces;
+        //passPlaces = passPlaces > numberOfOpenSpots ? numberOfOpenSpots : passPlaces ;  TODO Test dit en kijken of het nodig is
+        passPlaces = passPlaces < 0 ? 0 : passPlaces;
+        amount = passPlaces;
         cars = new Car[numberOfFloors][numberOfRows][numberOfPlaces];
-        
+
         carParkView = new CarParkView();
         advanceButton = new AdvanceButton();
-        
-        
+
+
         Container contentPane = getContentPane();
         contentPane.add(carParkView, BorderLayout.CENTER);
         contentPane.add(advanceButton, BorderLayout.NORTH);
-        
+
         pack();
         setVisible(true);
 
@@ -38,7 +45,10 @@ public class SimulatorView extends JFrame {
     public void updateView() {
         carParkView.updateView();
     }
-    
+    public int getPassPlaces(){
+      return passPlaces;
+    }
+
 	public int getNumberOfFloors() {
         return numberOfFloors;
     }
@@ -54,7 +64,7 @@ public class SimulatorView extends JFrame {
     public int getNumberOfOpenSpots(){
     	return numberOfOpenSpots;
     }
-    
+
     public Car getCarAt(Location location) {
         if (!locationIsValid(location)) {
             return null;
@@ -94,15 +104,25 @@ public class SimulatorView extends JFrame {
         for (int floor = 0; floor < getNumberOfFloors(); floor++) {
             for (int row = 0; row < getNumberOfRows(); row++) {
                 for (int place = 0; place < getNumberOfPlaces(); place++) {
-                    Location location = new Location(floor, row, place);
-                    if (getCarAt(location) == null) {
-                        return location;
+                  if (paying == true){
+                    if (floor <= lastPass.getFloor()){
+                      floor = lastPass.getFloor();
+                      if (row <= lastPass.getRow()){
+                        row = lastPass.getRow();
+                        place = place <= lastPass.getPlace() ? lastPass.getPlace() + 1 : place ;
+                      }
                     }
+                  }
+                  Location location = new Location(floor, row, place);
+                  Location check = getCarAt(location) == null ? location : null;
+                  if (check != null){
+                    return location;
+                  }
                 }
+              }
             }
-        }
-        return null;
-    }
+            return null;
+          }
 
     public Car getFirstLeavingCar() {
         for (int floor = 0; floor < getNumberOfFloors(); floor++) {
@@ -142,26 +162,26 @@ public class SimulatorView extends JFrame {
         }
         return true;
     }
-    
+
     private class CarParkView extends JPanel {
-        
+
         private Dimension size;
-        private Image carParkImage;    
-    
+        private Image carParkImage;
+
         /**
          * Constructor for objects of class CarPark
          */
         public CarParkView() {
             size = new Dimension(0, 0);
         }
-    
+
         /**
          * Overridden. Tell the GUI manager how big we would like to be.
          */
         public Dimension getPreferredSize() {
             return new Dimension(800, 500);
         }
-    
+
         /**
          * Overriden. The car park view component needs to be redisplayed. Copy the
          * internal image to screen.
@@ -170,7 +190,7 @@ public class SimulatorView extends JFrame {
             if (carParkImage == null) {
                 return;
             }
-    
+
             Dimension currentSize = getSize();
             if (size.equals(currentSize)) {
                 g.drawImage(carParkImage, 0, 0, null);
@@ -180,7 +200,7 @@ public class SimulatorView extends JFrame {
                 g.drawImage(carParkImage, 0, 0, currentSize.width, currentSize.height, null);
             }
         }
-    
+
         public void updateView() {
             // Create a new car park image if the size has changed.
             if (!size.equals(getSize())) {
@@ -191,16 +211,27 @@ public class SimulatorView extends JFrame {
             for(int floor = 0; floor < getNumberOfFloors(); floor++) {
                 for(int row = 0; row < getNumberOfRows(); row++) {
                     for(int place = 0; place < getNumberOfPlaces(); place++) {
-                        Location location = new Location(floor, row, place);
-                        Car car = getCarAt(location);
-                        Color color = car == null ? Color.white : car.getColor();
-                        drawPlace(graphics, location, color);
+                      Location location = new Location(floor, row, place);
+                      Car car = getCarAt(location);
+                      Color color = Color.white;
+                      if (passLeft > 0){
+                        color = car == null ? Color.yellow : car.getColor();
+                        if (amount > 0){
+                          lastPass = location;
+                          amount--;
+                        }
+                        passLeft--;
+                      }
+                      else {
+                        color = car == null ? color : car.getColor();
+                      }
+                      drawPlace(graphics, location, color);
                     }
                 }
             }
             repaint();
         }
-    
+
         /**
          * Paint a place on this car park view in a given color.
          */
@@ -213,33 +244,33 @@ public class SimulatorView extends JFrame {
                     10 - 1); // TODO use dynamic size or constants
         }
     }
-    	
-    private class AdvanceButton extends JPanel 
+
+    private class AdvanceButton extends JPanel
     							implements ActionListener
     {
-    	
+
     	public JButton ButtonPlusOne, ButtonPlusHunderd;
-    	
-    	public AdvanceButton() 
+
+    	public AdvanceButton()
     	{
     		ButtonPlusOne = new JButton("+1");
     		ButtonPlusOne.setToolTipText("Simuleer 1 minuut");
-    		
+
     		ButtonPlusHunderd = new JButton("+100");
     		ButtonPlusHunderd.setToolTipText("Simuleer 100 minuten");
 
     		ButtonPlusOne.addActionListener(this);
     		ButtonPlusHunderd.addActionListener(this);
-    		
+
     		ButtonPlusOne.setActionCommand("plus1");
     		ButtonPlusHunderd.setActionCommand("Plus100");
-    		
+
     		add(ButtonPlusOne);
     		add(ButtonPlusHunderd);
-    		
-    		
+
+
     	}
-    	
+
     	public void actionPerformed(ActionEvent e)
     	{
     		 if ("plus1".equals(e.getActionCommand()))
@@ -251,7 +282,7 @@ public class SimulatorView extends JFrame {
     			 Simulator.simulateByMinute(100);
     		 }
     	}
-    	
+
     }
 
 }
